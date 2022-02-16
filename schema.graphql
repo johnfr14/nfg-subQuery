@@ -1,0 +1,102 @@
+#--------------------------------#
+#        USER MANAGEMENT         #
+#--------------------------------#
+
+type User @entity {
+  id:                  ID!      # The wallet address of user
+  wallet_address:      String!  @index(unique: true)
+  nftOwned:            [Nfts]
+  conditions_of_use:   Boolean
+  profile:             Profile   
+}
+
+type Profile @entity{
+  id:         ID!
+  username:   String 
+  bio:        String
+  avatar:     String 
+  email:      String
+  user:       User    @index(unique: true)
+
+}
+
+
+#--------------------------------#
+#       ARTIST MANAGEMENT        #
+#--------------------------------#
+
+
+#--------------------------------#
+#       PRODUCT MANAGEMENT       #
+#--------------------------------#
+
+
+#--------------------------------#
+#         AUCTION PROCESS        #
+#--------------------------------#
+
+type Auction @entity{
+  id:         ID!   # The address of the auction
+  createdAt:        String! # Transaction hash
+
+  # Metadata at creation 
+  address_auction:     String!    @index(unique: true)
+  address_collection:  String!    @index(unique: true)
+  address_artist:      String!    @index(unique: true)    
+  auction_lots:        [Lot]      
+  auction_Sales:       [Sale]    
+  auction_start:       Date
+  auction_end:         Date
+  
+}
+
+type Lot @entity{
+  id               Int       @id @default(autoincrement())
+  updated_at       DateTime  @updatedAt
+  active           Boolean
+
+  # metadata at creation
+  address_auction     String    @unique
+  address_collection  String    @unique
+  collection_id       Int       @unique
+  start_price         Int       @unique
+
+  # During the auction
+  highest_bid      Int?      
+  bidder_address   String   @unique
+  bids             Bids[]   @relation(fields: [collection_id], references: [address_auction]) 
+  finalized        Boolean
+
+}
+
+type Sale @entity{
+  id               Int       @id @default(autoincrement())
+  updated_at       DateTime  @updatedAt
+
+  address_auction  String    @unique
+  start_price      Int
+  active           Boolean
+  finalized        Boolean
+
+}
+
+type Bids @entity{
+  id               Int       @id @default(autoincrement())
+  createdAt        DateTime  @default(now())
+  
+  auction_id       Int
+  collection_id    Int
+  bid_amount       Int
+  bidder_address   String   @unique
+}
+
+
+#--------------------------------#
+#           COLLECTION           #
+#--------------------------------#
+
+
+
+#--------------------------------#
+#            ERC 1155            #
+#--------------------------------#
