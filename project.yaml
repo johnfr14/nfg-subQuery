@@ -6,13 +6,16 @@ repository: 'https://github.com/subquery/astar-subql-starters'
 schema:
   file: ./schema.graphql
 network:
-  endpoint: 'wss://astar.api.onfinality.io/public-wss'
-  genesisHash: '0x9eb76c5184c4ab8679d2d5d819fdf90b9c001403e9e17da2e14b6d8aec4029c6'
-  dictionary: 'https://api.subquery.network/sq/subquery/astar-dictionary'
+  endpoint: 'wss://shibuya.eusko.in'
+  genesisHash: '0xddb89973361a170839f80f152d2e9e38a376a5a7eccefcade763f46a8e567019'
+  # dictionary: 'https://api.subquery.network/sq/subquery/astar-dictionary'
   chaintypes:
     file: ./dist/chaintypes.js
 dataSources:
+  - name: shibuyaRuntime
   - kind: substrate/Runtime
+    filter:
+      specName: shibuya
     startBlock: 1
     mapping:
       file: ./dist/index.js
@@ -21,7 +24,7 @@ dataSources:
           kind: substrate/BlockHandler
         - handler: handleEvent
           kind: substrate/EventHandler
-          filter:
+          filter: #Filter is optional
             module: balances
             method: Deposit
         - handler: handleCall
