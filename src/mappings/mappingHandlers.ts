@@ -1,33 +1,32 @@
-import {SubstrateExtrinsic,SubstrateEvent,SubstrateBlock} from "@subql/types";
-import {StarterEntity} from "../types";
-import {Balance} from "@polkadot/types/interfaces";
+import { MoonbeamEvent, MoonbeamCall } from '@subql/contract-processors/dist/moonbeam';
+import { ERC1155 } from "../types/models";
+import { BigNumber, utils } from "ethers";
+
+// Setup types from ABI
+type TransferSingleArgs = [address, address, address, BigNumber, BigNumber] & { operator: string; from: string; to: string; id: BigNumber; value: BigNumber; };
+type URIArgs = [string, BigNumber] & { value: string; id: BigNumber; }
 
 
-export async function handleBlock(block: SubstrateBlock): Promise<void> {
-    //Create a new starterEntity with ID using block hash
-    let record = new StarterEntity(block.block.header.hash.toString());
-    //Record block number
-    record.field1 = block.block.header.number.toNumber();
-    await record.save();
+export async function handleNfgTransfert(event: MoonbeamEvent<TransferSingleArgs>): Promise<void> {
+    const {event: {data: [operator, from, to, id]}} = event;
+    logger.info(event)
+    const erc1155 = new ERC1155(utils.formaEther(id))
+    
+    // //Retrieve the record by its ID
+    // const record = await StarterEntity.get(event.block.block.header.hash.toString());
+    // record.field2 = account.toString();
+    // //Big integer type Balance of a transfer event
+    // record.field3 = (balance as Balance).toBigInt();
+    await erc1155.save();
 }
 
-export async function handleEvent(event: SubstrateEvent): Promise<void> {
-    const {event: {data: [account, balance]}} = event;
-    //Retrieve the record by its ID
-    const record = await StarterEntity.get(event.block.block.header.hash.toString());
-    record.field2 = account.toString();
-    //Big integer type Balance of a transfer event
-    record.field3 = (balance as Balance).toBigInt();
-    await record.save();
+export async function handleNfgUri(event: URIArgs): Promise<void> {
+    const {event: {data: [value, id]}} = event;
+    logger.info(info)
+    // //Retrieve the record by its ID
+    // const record = await StarterEntity.get(event.block.block.header.hash.toString());
+    // record.field2 = account.toString();
+    // //Big integer type Balance of a transfer event
+    // record.field3 = (balance as Balance).toBigInt();
+    // await record.save();
 }
-
-export async function handleCall(extrinsic: SubstrateExtrinsic): Promise<void> {
-    const record = await StarterEntity.get(extrinsic.block.block.header.hash.toString());
-    //Date type timestamp
-    record.field4 = extrinsic.block.timestamp;
-    //Boolean tyep
-    record.field5 = true;
-    await record.save();
-}
-
-

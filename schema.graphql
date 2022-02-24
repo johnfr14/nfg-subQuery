@@ -4,13 +4,13 @@
 
 type User @entity {
   id:                  ID!  # The wallet address of user
-  ERC721_owned:        [ERC721]   @derivedFrom(field: "address_owner")
-  ERC1155_owned:       [ERC1155]  @derivedFrom(field: "address_owner")
+  ERC721_owned:        [ERC721]   @derivedFrom(field: "owner")
+  ERC1155_owned:       [ERC1155]  @derivedFrom(field: "owner")
   conditions_of_use:   Boolean
   profile:             Profile   
 }
 
-type Profile @jsonField {
+type Profile @entity {
   id:         ID!
   username:   String 
   bio:        String
@@ -27,9 +27,9 @@ type Profile @jsonField {
 
 type Artist @entity {
   id: ID! # Address of the artist
-  erc721_created:       [ERC721]    @derivedFrom(field: "address_artist")
-  erc115_created:       [ERC1155]   @derivedFrom(field: "address_artist")
-  auctions:             [Auction]   @derivedFrom(field: "address_artist")
+  erc721_created:       [ERC721]    @derivedFrom(field: "artist")
+  erc115_created:       [ERC1155]   @derivedFrom(field: "artist")
+  auctions:             [Auction]   @derivedFrom(field: "artist")
   total_sales:          Int
   total_sales_amount:   BigInt
 }
@@ -50,9 +50,9 @@ type Auction @entity{
   createdAt:        Date! # Transaction hash
 
   # Metadata at creation 
-  address_artist:      Artist!        
-  auction_lots:        [Lot]      @derivedFrom(field: "address_auction")  
-  auction_Sales:       [Sale]     @derivedFrom(field: "address_auction") 
+  artist:              Artist!        
+  auction_lots:        [Lot]      @derivedFrom(field: "auction")  
+  auction_Sales:       [Sale]     @derivedFrom(field: "auction") 
   auction_start:       Date
   auction_end:         Date
   
@@ -64,14 +64,14 @@ type Lot @entity{
   active:           Boolean!
 
   # metadata at creation
-  address_auction:     String!  @index(unique: true)  
+  auction:             Auction!  
   ERC721:              ERC721!  
-  start_price:         Int!     @index(unique: true)  
+  start_price:         Int!      @index(unique: true)  
 
   # During the auction
   highest_bid:      Int      
   bidder_address:   String   @index(unique: true)
-  bids:             [Bids]   @derivedFrom(field: "lot_id") 
+  bids:             [Bids]   @derivedFrom(field: "lot") 
   finalized:        Boolean
   iscanceled:       Boolean
 
@@ -83,7 +83,7 @@ type Sale @entity{
   collection:           ERC1155!
   quantity:             Int!       @index(unique: true)
 
-  address_auction:      String!    @index(unique: true)
+  auction:              Auction! 
   quantity_remaining:   Int!       
   price:                Int!       @index(unique: true)
   active:               Boolean
@@ -95,11 +95,11 @@ type Bids @entity{
   id:               ID!       
   createdAt:        Date!
   
-  auction_id:       Int!
-  lot_id:           String!
+  auction:          Auction!
+  lot:              Lot!
   collection_id:    Int!
   bid_amount:       Int!
-  bidder_address:   String!   @index(unique: true)
+  bidder:           User!
 }
 
 
@@ -109,13 +109,13 @@ type Bids @entity{
 
 type ERC721 @entity {
   id: ID! # The id of the nft
-  address_artist:   Artist!
-  address_owner:    User!
+  artist:           Artist!
+  owner:            User!
 
-  title: String!
-  description: String
-  timeStamp: Int!
-  url: String!
+  title:            String!
+  description:      String
+  timeStamp:        Int!
+  url:              String!
 } 
 
 
@@ -125,12 +125,12 @@ type ERC721 @entity {
 
 type ERC1155 @entity {
   id: ID! # The id of the nft
-  address_artist:   Artist!
-  address_owner:    User!
+  artist:           Artist
+  owner:            User
 
-  title: String!
-  description: String
-  timeStamp: Int!
-  url: String!
-  amount: Int!
+  title:            String
+  description:      String
+  timeStamp:        Int
+  url:              String
+  amount:           Int
 } 

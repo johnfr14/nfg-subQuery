@@ -6,26 +6,35 @@ repository: 'https://github.com/subquery/astar-subql-starters'
 schema:
   file: ./schema.graphql
 network:
-  endpoint: 'wss://shibuya.eusko.in'
-  genesisHash: '0xddb89973361a170839f80f152d2e9e38a376a5a7eccefcade763f46a8e567019'
+  endpoint: 'wss://shibuya.eusko.in' # web socket: https://docs.astar.network/integration/network-details
+  genesisHash: '0xddb89973361a170839f80f152d2e9e38a376a5a7eccefcade763f46a8e567019' # Genesis hash of Shibuya
   # dictionary: 'https://api.subquery.network/sq/subquery/astar-dictionary'
   chaintypes:
     file: ./dist/chaintypes.js
 dataSources:
-  - name: shibuyaRuntime
-  - kind: substrate/Runtime
-    filter:
-      specName: shibuya
-    startBlock: 1
+  - name: shibuya
+    kind: substrate/Shibuya
+    startBlock: 921852 # This changes your indexing start block, set this higher to skip initial blocks with less data
+    processor:
+      file: './node_modules/@subql/contract-processors/dist/moonbeam.js'
+      options:
+        # Must be a key of assets
+        abi: nfgToken
+        ## The contract that emitted the event
+        address: '0xC6F0aEa9294A0D28D5acFb048F806953648243D4'
+    assets:
+      nfgToken:
+        file: './erc20.abi.json'
     mapping:
-      file: ./dist/index.js
+      file: './dist/index.js'
       handlers:
-        - handler: handleBlock
-          kind: substrate/BlockHandler
-        - handler: handleEvent
-          kind: substrate/EventHandler
-          filter: #Filter is optional
-            module: balances
-            method: Deposit
-        - handler: handleCall
-          kind: substrate/CallHandler
+        - handler: handleNfgTransfert
+          kind: substrate/MoonbeamEvent
+          filter:
+            topics:
+              - TransferSingle(address indexed operator, address indexed from, address indexed to, uint256 id, uint256 value)
+        - handler: handleNfgUri
+          kind: substrate/MoonbeamEvent
+          filter:
+            topics:
+              - URI(string value, uint256 indexed id)
